@@ -1,0 +1,32 @@
+name: Build ARM64 Kernel
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y crossbuild-essential-arm64 make bc bison flex libssl-dev libncurses-dev
+
+    - name: Build Kernel
+      run: |
+        cd linux
+        make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
+
+    - name: Upload Kernel Image
+      uses: actions/upload-artifact@v3
+      with:
+        name: kernel-arm64
+        path: linux/arch/arm64/boot/Image
+
