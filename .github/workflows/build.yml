@@ -1,32 +1,31 @@
-name: Build ARM64 Kernel
+name: Interactive tmate session
 
+# manuel başlatma için workflow_dispatch kullanıyoruz
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build:
+  tmate-shell:
     runs-on: ubuntu-latest
+    # uzun canlı oturumlar için timeout artırabilirsin
+    timeout-minutes: 180
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Install dependencies
+    - name: Install common tools (optional)
       run: |
         sudo apt update
-        sudo apt install -y crossbuild-essential-arm64 make bc bison flex libssl-dev libncurses-dev
+        sudo apt install -y git build-essential curl wget ca-certificates
+      # eğer network erişimi gerekmezse bu step'i çıkarabilirsin
 
-    - name: Build Kernel
-      working-directory: linux
-      run: |
-        make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
+    - name: Start tmate session (open interactive SSH/web shell)
+      uses: mxschmitt/action-tmate@v3
+      # no input required; action otomatik oluşturur ve connection bilgilerini log'a basar
 
-    - name: Upload Kernel Image
-      uses: actions/upload-artifact@v4
-      with:
-        name: kernel-arm64
-        path: linux/arch/arm64/boot/Image
+    # optional: after tmate started, bu step ile birşeyler çalıştırabilirsin
+    # fakat genelde tmate step sonrası runner interaktif olurken bu step bloklanabilir.
+    # - name: Do something (optional)
+    #   run: echo "you can pre-run setup here if needed"
 
