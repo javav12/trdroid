@@ -17,7 +17,7 @@ jobs:
     - name: Install common tools (optional)
       run: |
         sudo apt update
-        sudo apt install -y git curl wget ca-certificates docker.io
+        sudo apt install -y git curl wget ca-certificates
       # eğer network erişimi gerekmezse bu step'i çıkarabilirsin
 
     - name: Start tmate session (open interactive SSH/web shell)
