@@ -29,3 +29,9 @@ jobs:
     # - name: Do something (optional)
     #   run: echo "you can pre-run setup here if needed"
 
+    - name: Upload build artifacts
+      if: always()   # tmate oturumu iptal edilse bile çalışır
+      uses: actions/upload-artifact@v4
+      with:
+        name: output-files
+        path: /home/runner/work/trdroid/output
