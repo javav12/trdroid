@@ -27,9 +27,8 @@ RUN groupadd -g ${USER_GID} ${USERNAME} || true && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} && \
     chmod 0440 /etc/sudoers.d/${USERNAME} && \
     chown -R ${USER_UID}:${USER_GID} /home/${USERNAME}
-RUN mkdir /mnt/output/trdroiddev
 # Çalışma dizini
-WORKDIR /mnt/output/trdroiddev
+WORKDIR /mnt/output/
 
 RUN git clone --depth 1 https://github.com/torvalds/linux  && git clone --depth 1 https://github.com/javav12/trdroid && git clone --depth 1 https://git.busybox.net/busybox
 
