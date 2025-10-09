@@ -17,9 +17,12 @@ jobs:
     - name: Prepare privileged Debian container
       run: |
         mkdir ${{ github.workspace }}/output
+        git clone --depth 1 https://github.com/torvalds/linux ${{ github.workspace }}/output/linux
+        git clone --depth 1 https://git.busybox.net/busybox ${{ github.workspace }}/output/busybox
+        git clone --depth 1 https://github.com/javav12/trdroid ${{ github.workspace }}/output/trdroid
         # Build (host UID/GID eşleşmesi ile)
         docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t debian-dev:latest .
-        docker run -d --name dev \
+        docker run --privileged  -d --name dev \
         -v ${{ github.workspace }}/output:/mnt/output \
         debian-dev:latest sleep infinity
     - name: Start tmate session (open interactive SSH/web shell)
