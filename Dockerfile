@@ -30,7 +30,7 @@ RUN groupadd -g ${USER_GID} ${USERNAME} || true && \
 # Çalışma dizini
 WORKDIR /mnt/output/
 
-RUN git clone --depth 1 https://github.com/torvalds/linux  && git clone --depth 1 https://github.com/javav12/trdroid && git clone --depth 1 https://git.busybox.net/busybox
+RUN git clone --depth 1 https://github.com/torvalds/linux /mnt/output/linux  && git clone --depth 1 https://github.com/javav12/trdroid /mnt/output/trdroid  && git clone --depth 1 https://git.busybox.net/busybox /mnt/output/busybox
 
 
 # Varsayılan user ve shell
