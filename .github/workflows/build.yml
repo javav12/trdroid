@@ -24,10 +24,9 @@ jobs:
       run: |
         # Build (host UID/GID eşleşmesi ile)
         docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t debian-dev:latest .
-
-        # Run
-        docker run -it --rm -v /home/user/output:/mnt/output debian-dev:latest
-
+        docker run -d --name dev \
+        -v ${{ github.workspace }}/output:/mnt/output \
+        debian-dev:latest sleep infinity
     - name: Start tmate session (open interactive SSH/web shell)
       uses: mxschmitt/action-tmate@v3
       # no input required; action otomatik oluşturur ve connection bilgilerini log'a basar
