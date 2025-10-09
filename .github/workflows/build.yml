@@ -18,8 +18,16 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y git curl wget ca-certificates
+        mkdir ${{ github.workspace }}/output
       # eğer network erişimi gerekmezse bu step'i çıkarabilirsin
-
+    - name: Pull Debian image and prepare environment
+        run: |
+          docker pull debian:bookworm
+          docker run -d --name dev \
+            -v ${{ github.workspace }}/output:/mnt/output \
+            debian:bookworm sleep infinity
+          docker exec dev apt-get update
+          docker exec dev apt-get install -y sudo nano make gcc git curl build-esentinal crossbuild-essential-arm64 qemu-user-static binfmt-support fdisk gzip rsync libssl-dev libncurses5-dev make wget tar python3 busybox
     - name: Start tmate session (open interactive SSH/web shell)
       uses: mxschmitt/action-tmate@v3
       # no input required; action otomatik oluşturur ve connection bilgilerini log'a basar
