@@ -20,16 +20,13 @@ jobs:
         sudo apt install -y git curl wget ca-certificates
         mkdir ${{ github.workspace }}/output
       # eğer network erişimi gerekmezse bu step'i çıkarabilirsin
-    - name: Pull Debian image and prepare environment
+    - name: Prepare privileged Debian container
       run: |
-        docker pull debian:bookworm
-        docker run -d --name dev \
-          -v ${{ github.workspace }}/output:/mnt/output \
-          debian:bookworm sleep infinity
-          docker exec -u root dev bash -c "export DEBIAN_FRONTEND=noninteractive"
-          docker exec -u root  dev apt-get update
-          docker exec -u root dev apt-get update && apt-get install -y sudo nano vim git curl wget ca-certificates build-essential flex bison bc kmod cpio rsync libncurses5-dev libssl-dev libelf-dev gcc g++ make pkg-config file unzip zip tar xz-utils crossbuild-essential-arm64 qemu-user-static binfmt-support python3 python3-pip python3-distutils busybox fakeroot util-linux openssh-client dialog fdisk  && apt-get clean
-          docker exec -u root dev bash -c "useradd -m -s /bin/bash dev && echo 'dev ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/dev && chmod 0440 /etc/sudoers.d/dev && chown -R dev:dev /home/dev"
+        # Build (host UID/GID eşleşmesi ile)
+        docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t debian-dev:latest .
+
+        # Run
+        docker run -it --rm -v /home/user/output:/mnt/output debian-dev:latest
 
     - name: Start tmate session (open interactive SSH/web shell)
       uses: mxschmitt/action-tmate@v3
