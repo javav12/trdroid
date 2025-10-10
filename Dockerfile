@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     gcc g++ make pkg-config file unzip zip tar xz-utils \
     crossbuild-essential-arm64 qemu-user-static binfmt-support \
     python3 python3-pip python3-distutils \
-    busybox fakeroot util-linux \
+    busybox fakeroot util-linux qemu-system \
     openssh-client dialog fdisk \
     && apt-get clean
 
