@@ -1,4 +1,4 @@
-name: Interactive tmate session
+name: tdb denv
 
 # manuel başlatma için workflow_dispatch kullanıyoruz
 on:
