@@ -1,65 +1,41 @@
 name: tdb denv
 
+# manuel başlatma için workflow_dispatch kullanıyoruz
 on:
   workflow_dispatch:
 
 jobs:
   tmate-shell:
     runs-on: ubuntu-latest
+    # uzun canlı oturumlar için timeout artırabilirsin
     timeout-minutes: 720
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Restore Docker image cache
-        id: docker-cache
-        uses: actions/cache@v3
-        with:
-          path: docker-image.tar.gz
-          key: docker-image-cache-v1
+    - name: Prepare privileged Debian container
+      run: |
+        mkdir ${{ github.workspace }}/output
+        git clone https://github.com/buildroot/buildroot.git ${{ github.workspace }}/output/buildroot
+        git clone --depth 1 https://github.com/javav12/trdroid ${{ github.workspace }}/output/trdroid
+        # Build (host UID/GID eşleşmesi ile)
+        docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t debian-dev:latest .
+        docker run --privileged  -d --name dev \
+        -v ${{ github.workspace }}/output:/mnt/output \
+        debian-dev:latest sleep infinity
+    - name: Start tmate session (open interactive SSH/web shell)
+      uses: mxschmitt/action-tmate@v3
+      # no input required; action otomatik oluşturur ve connection bilgilerini log'a basar
 
-      - name: Load Docker image from cache if available
-        if: steps.docker-cache.outputs.cache-hit == 'true'
-        run: |
-          echo "Cache found, loading Docker image..."
-          gunzip -c docker-image.tar.gz | docker load
+    # optional: after tmate started, bu step ile birşeyler çalıştırabilirsin
+    # fakat genelde tmate step sonrası runner interaktif olurken bu step bloklanabilir.
+    # - name: Do something (optional)
+    #   run: echo "you can pre-run setup here if needed"
 
-      - name: Prepare output directory and clone repos
-        run: |
-          mkdir -p ${{ github.workspace }}/output
-          git clone https://github.com/buildroot/buildroot.git ${{ github.workspace }}/output/buildroot
-          git clone --depth 1 https://github.com/javav12/trdroid ${{ github.workspace }}/output/trdroid
-
-      - name: Build Docker image (only if not cached)
-        if: steps.docker-cache.outputs.cache-hit != 'true'
-        run: |
-          echo "Cache not found, building Docker image..."
-          docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t debian-dev:latest .
-
-      - name: Start Docker container
-        run: |
-          docker run --privileged -d --name dev \
-            -v ${{ github.workspace }}/output:/mnt/output \
-            debian-dev:latest sleep infinity
-
-      - name: Start tmate session (interactive SSH)
-        uses: mxschmitt/action-tmate@v3
-
-      - name: Save Docker image to cache after tmate session ended
-        run: |
-          echo "tmate session ended, saving Docker image to tar.gz for cache..."
-          docker save debian-dev:latest | gzip > docker-image.tar.gz
-
-      - name: Upload Docker image cache
-        uses: actions/cache@v3
-        with:
-          path: docker-image.tar.gz
-          key: docker-image-cache-v1
-
-      - name: Upload build artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: output-files
-          path: ${{ github.workspace }}/output/*
+    - name: Upload build artifacts
+      if: always()   # tmate oturumu iptal edilse bile çalışır
+      uses: actions/upload-artifact@v4
+      with:
+        name: output-files
+        path: ${{ github.workspace }}/output/*
