@@ -1,4 +1,4 @@
-name: tdb denv
+name: tdb env
 
 # manuel başlatma için workflow_dispatch kullanıyoruz
 on:
@@ -14,16 +14,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Prepare privileged Debian container
-      run: |
-        mkdir ${{ github.workspace }}/output
-        git clone https://github.com/buildroot/buildroot.git ${{ github.workspace }}/output/buildroot
-        git clone --depth 1 https://github.com/javav12/trdroid ${{ github.workspace }}/output/trdroid
-        # Build (host UID/GID eşleşmesi ile)
-        docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t debian-dev:latest .
-        docker run --privileged  -d --name dev \
-        -v ${{ github.workspace }}/output:/mnt/output \
-        debian-dev:latest sleep infinity
+    #- name: Prepare privileged Debian container
+    #  run: |
+      #  mkdir ${{ github.workspace }}/output
+      #  git clone https://github.com/buildroot/buildroot.git ${{ github.workspace }}/output/buildroot
+      #  git clone --depth 1 https://github.com/javav12/trdroid ${{ github.workspace }}/output/trdroid
+      #  # Build (host UID/GID eşleşmesi ile)
+      #  docker build --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t debian-dev:latest .
+      #  docker run --privileged  -d --name dev \
+      #  -v ${{ github.workspace }}/output:/mnt/output \
+      #  debian-dev:latest sleep infinity
     - name: Start tmate session (open interactive SSH/web shell)
       uses: mxschmitt/action-tmate@v3
       # no input required; action otomatik oluşturur ve connection bilgilerini log'a basar
